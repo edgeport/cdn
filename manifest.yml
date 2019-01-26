@@ -1,0 +1,107 @@
+version: 1.1
+jpsType: update
+categories:
+- apps/dev-tools
+targetNodes:
+  nodeGroup:
+    - bl
+    - cp
+id: cdn
+baseUrl: https://raw.githubusercontent.com/edgeport/cdn/master
+name: Edgeport - Premium CDN
+logo: /images/edgeport-white-logo-70x70-2.png
+homepage: https://edgeport.net
+description:
+  short: Edgeport - Premium CDN 
+ 
+onBeforeInit: |
+  var resp = jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.wizard.ui");            
+  return resp.response ? resp.response:resp;
+  
+globals:
+  valueRR: RR
+  valuePF: PF
+  appid: c05ffa5b45628a2a0c95467ebca8a0b4
+  #appName: CDN EdgePort Service  
+  
+buttons:    
+  - caption: Custom CNAME
+    confirmText: Are you sure?
+    loadingText: We are adding your custom CNAME
+    action: customCname
+    successText: Your custom CNAME added successfully!
+    settings: cname
+    title: Custom CNAME
+    submitButtonText: Submit
+
+  - settings: ha
+    action: haConfig
+    caption: High Availability
+    submitButtonText: Apply  
+           
+menu:  
+  - caption: Purge
+    confirmText: Are you sure?
+    loadingText: We are purging your files
+    action: purgeSingle
+    successText: Purge was successfully!
+    settings: purge
+    title: Purge
+    submitButtonText: Submit
+
+  - caption: Purge All
+    confirmText: Are you sure?
+    loadingText: We are purging your files
+    action: purge
+    successText: Purge was successfully!
+    title: Purge All
+    submitButtonText: Submit
+ 
+onInstall: 
+  eval:
+    act: install
+    
+onAfterScaleOut:
+  scale: ${event.params.nodeGroup}
+
+onAfterScaleIn:
+  scale: ${event.params.nodeGroup}
+  
+onBeforeDelete: cdnUninstall
+onUninstall: cdnUninstall
+
+actions:
+  scale:
+    if ('${this}' == 'bl' || ('${this}' == 'cp' && !nodes.bl)): 
+      eval:
+        act: scale    
+
+  eval:
+    script: |-
+        var params = {masterEnv:"${settings.masterEnv:}", envName:"${env.envName}", envDomain:"${env.domain}", action:"${this.act:script}", ha:"${settings.hamethod:}", customCname:"${this.customCname:}", path:"${this.path:}"},
+            resp = jelastic.dev.scripting.Eval("${globals.appid}", session, "cdn.${this.script:install}", params);            
+        return resp.response ? resp.response:resp;
+         
+  haConfig:
+    eval:
+      act: ha 
+          
+  #TODO: send message to owner after change SSL option, strore in DB for charging job
+  customCname:
+    eval:
+      act: cname 
+      customCname: ${settings.customCname}
+
+  purgeSingle:
+    purge: ${settings.purgefile}
+      
+  purge:
+    eval: 
+      script: purge
+      path: ${this:}
+          
+  cdnUninstall:
+    eval: 
+      script: uninstall          
+
+success: Your edgecast content delivery network is configured as [${env.envName}-${settings.partnerCode}.cdn.edgeport.net](http://${env.envName}-${settings.partnerCode}.cdn.edgeport.net). Please allow up to 1 hour for the URL to get fully propagated.
