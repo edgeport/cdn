@@ -25,20 +25,12 @@ globals:
   #appName: CDN EdgePort Service  
   
 buttons:    
-  - caption: Custom CNAME
-    confirmText: Are you sure?
-    loadingText: We are adding your custom CNAME
-    action: customCname
-    successText: Your custom CNAME added successfully!
-    settings: cname
-    title: Custom CNAME
-    submitButtonText: Submit
 
-  - settings: ha
-    action: haConfig
-    caption: High Availability
+  - settings: config
+    action: config
+    caption: Configure
     submitButtonText: Apply  
-           
+
 menu:  
   - caption: Purge
     confirmText: Are you sure?
@@ -78,19 +70,14 @@ actions:
 
   eval:
     script: |-
-        var params = {masterEnv:"${settings.masterEnv:}", envName:"${env.envName}", envDomain:"${env.domain}", action:"${this.act:script}", ha:"${settings.hamethod:}", customCname:"${this.customCname:}", path:"${this.path:}"},
+        var params = {masterEnv:"${settings.masterEnv:}", envName:"${env.envName}", envDomain:"${env.domain}", action:"${this.act:script}", ha:"${settings.ha:}", header:"${settings.header:}", customCname:"${settings.customCname:}", path:"${this.path:}"},
             resp = jelastic.dev.scripting.Eval("${globals.appid}", session, "cdn.${this.script:install}", params);            
-        return resp.response ? resp.response:resp;
-         
-  haConfig:
-    eval:
-      act: ha 
-          
+        return resp.response ? resp.response:resp;      
+
   #TODO: send message to owner after change SSL option, strore in DB for charging job
-  customCname:
+  config:
     eval:
-      act: cname 
-      customCname: ${settings.customCname}
+      act: config             
 
   purgeSingle:
     purge: ${settings.purgefile}
