@@ -8,12 +8,12 @@ targetNodes:
     - cp
 id: cdn
 baseUrl: https://raw.githubusercontent.com/edgeport/cdn/master
-name: Edgeport - Premium CDN
+name: HTTP/3 Premium CDN
 logo: /images/edgeport-white-logo-70x70-2.png
 homepage: https://edgeport.net
 description:
-  short: Edgeport - Premium CDN 
- 
+  short: Enterprise-level HTTP-over-QUIC CDN
+
 onBeforeInit: |
   var resp = jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.wizard.ui");            
   return resp.response ? resp.response:resp;
