@@ -91,4 +91,7 @@ actions:
     eval: 
       script: uninstall          
 
-success: Your edgecast content delivery network is configured as [${env.envName}-${settings.partnerCode}.cdn.edgeport.net](http://${env.envName}-${settings.partnerCode}.cdn.edgeport.net). Please allow up to 1 hour for the URL to get fully propagated.
+success: |
+  __CDN URL:__ [${env.envName}-${settings.partnerCode}.cdn.edgeport.net](http://${env.envName}-${settings.partnerCode}.cdn.edgeport.net) 
+  
+  Please allow up to 1 hour for the URL to get fully propagated.
