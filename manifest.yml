@@ -1,11 +1,7 @@
 version: 1.1
-jpsType: update
+type: update
 categories:
 - apps/dev-tools
-targetNodes:
-  nodeGroup:
-    - bl
-    - cp
 id: cdn
 baseUrl: https://raw.githubusercontent.com/edgeport/cdn/master
 name: HTTP/3 Premium CDN
