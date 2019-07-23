@@ -10,6 +10,11 @@ homepage: https://edgeport.net
 description:
   short: Enterprise-level HTTP-over-QUIC CDN
 
+targetNodes:
+  nodeGroup:
+    - bl
+    - cp
+    
 onBeforeInit: |
   var resp = jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.wizard.ui");            
   return resp.response ? resp.response:resp;
