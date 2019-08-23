@@ -51,8 +51,14 @@ menu:
     submitButtonText: Submit
  
 onInstall: 
-  eval:
-    act: install
+  - eval:
+      act: install
+  - if ("${settings.masterEnv:}"): 
+      setGlobals: 
+        envName: ${settings.masterEnv:}
+  - if (!"${settings.masterEnv:}"): 
+      setGlobals: 
+        envName: ${env.envName}
     
 onAfterScaleOut:
   scale: ${event.params.nodeGroup}
@@ -96,7 +102,4 @@ actions:
     eval: 
       script: uninstall          
 
-success: |
-  __CDN URL:__ [${env.envName}-${settings.partnerCode}.cdn.edgeport.net](http://${env.envName}-${settings.partnerCode}.cdn.edgeport.net) 
-  
-  Please allow up to 1 hour for the URL to get fully propagated.
+success: /text/success.md
