@@ -81,7 +81,7 @@ actions:
 
   eval:
     script: |-
-        var params = {masterEnv:"${settings.masterEnv:}", envName:"${env.envName}", action:"${this.act:script}", ha:"${settings.ha:}", header:"${settings.header:}", customCname:"${settings.customCname:}", path:"${this.path:}"},
+        var params = {masterEnv:"${settings.masterEnv:}", envName:"${env.envName}", action:"${this.act:script}", ha:"${settings.ha:}", header:"${settings.header:}", customCname:"${settings.customCname:}", path:"${this.path:}", note:"${settings.note:}"},
             resp = jelastic.dev.scripting.Eval("${globals.appid}", session, "cdn.${this.script:install}", params);            
         return resp.response ? resp.response:resp;      
 
