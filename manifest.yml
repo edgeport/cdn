@@ -5,7 +5,7 @@ categories:
 id: cdn
 baseUrl: https://raw.githubusercontent.com/edgeport/cdn/master
 name: HTTP/3 Premium CDN
-logo: /images/edgeport-white-logo-70x70-2.png
+logo: /images/edgeport-blue-logo-70x70.png
 homepage: https://edgeport.net
 description:
   short: Enterprise-level HTTP-over-QUIC CDN
