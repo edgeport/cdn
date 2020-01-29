@@ -70,6 +70,12 @@ onAfterMigrate:
   eval:
     act: migrate
 
+onAfterClone:  
+  - script: delete MANIFEST.id; return {result:0, jps:MANIFEST};
+  - install[${targetNodes.nodeGroup}]: ${response.jps}
+    envName: ${event.response.env.envName}    
+    settings: ${settings.toJSON()}
+
 onBeforeDelete: cdnUninstall
 onUninstall: cdnUninstall
 
