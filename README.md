@@ -5,8 +5,6 @@ Jelastic CDN add-on uses the HTTP/3 Premium Content Delivery Network(CDN) [Edgep
 
 HTTP/3 or HTTP-over-QUIC (Quick UDP Internet Connections) improves web application performance by up to 60%. Web pages load faster, and viewers enjoy a better experience with content loading more efficiently. HTTP/3 provides better security since it was designed to require traffic encryption by default. 
 
-Here we consider add-on installation and configuration for very popular application such as Magento.
-
 ## Installation Process
 1. Import the [raw link of the add-on manifest](https://raw.githubusercontent.com/edgeport/cdn/master/manifest.yml) within Jelastic PaaS dashboard or initiate the installation within **Marketplace > Add-Ons**.
 
@@ -33,9 +31,11 @@ where **${sufix}** - is a code name of your Jelastic hosting provider automatica
 
 Within the first hour or less, you may encounter a 404 error as it takes time for the static resources of the new environment to propagate across the CDN.
 
+The next step is to register the CDN URL in your application. Let's consider an example based on Magento e-commerce platform.
+
 In order to make the static content of the website downloadable from PoPs, open Magento admin panel. Then click on **STORES > Configuration > Web > Base URLs (Secure)**.
 
-Specify https protocol and the domain name either you chose before environment installation or custom one assigned via A record for the field **Secure Base URL**.
+Specify https protocol and the domain name either you chose before environment installation or custom one assigned via an A record for the field **Secure Base URL**.
 
 And specify CDN URL for the fields:  
 
