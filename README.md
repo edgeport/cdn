@@ -71,8 +71,7 @@ Follow the steps to get such a solution:
  2. The successful installation window appears with the CDN URL which actually refers to the same endpoint the existing environment does. 
  
  <p align="left"> 
-<img src="images/cdn-second-success.png
-" width="450">
+<img src="images/cdn-second-success.png" width="450">
 </p>
 
 Thus the HA mode is achieved with duplicated origins:
