@@ -132,3 +132,8 @@ Then put a custom domain of the website you prefer to be served via CDN into the
 <img src="images/custom-header.png" width="600"> 
 </p>
 
+Please contact support via Jelastic platform dashboard if you have problems configuring CDN add-on.
+
+ <p align="left"> 
+<img src="images/support.png" width="778"> 
+</p>
