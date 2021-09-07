@@ -28,8 +28,7 @@ __${env.envName}-${sufix}.cdn.jelastic.net__,
 where **${sufix}** - is a code name of your Jelastic hosting provider automatically generated for the environment hostname upon add-on installation.
 
 <p align="left"> 
-<img src="images/cdn-success.png
-" width="450">
+<img src="images/cdn-success.png" width="450">
 </p>
 
 Within the first hour or less, you may encounter a 404 error as it takes time for the static resources of the new environment to propagate across the CDN.
