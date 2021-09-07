@@ -107,7 +107,7 @@ Once you've attached CDN service, it automatically generates a dedicated domain 
 <img src="images/custom-cname.png" width="600">
 </p>
 
-Once you’ve applied this, the static website content will be available via your custom domain.
+When you’ve applied this, the static website content will be available via your custom domain.
 
 ## High Availability Method
 
