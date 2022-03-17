@@ -63,12 +63,12 @@ onInstall:
               envName: ${globals.secondaryEnvName}
               nodeGroup: ${targetNodes.nodeGroup}
               app_id: ${globals.app_id}
-          - install
+          - installAddon
           - script: return jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.info", {partnerCode:1})
           - cmd[${nodes.cp.master.id}]: |-
               bash ~/bin/setupWP.sh --edgeportCDN true --CDN_URL ${env.envName}-${response.response.partnerCode}.cdn.jelastic.net
           - install: 
-              jps: http://owncloud-clone.demo.jelastic.com/public.php?service=files&t=aa2f935c0c539ef115dd170242699013&download
+              jps: ${baseUrl}/manifest.yml
               nodeGroup: ${targetNodes.nodeGroup}
               skipEmail: true
               envName: ${globals.secondaryEnvName}
@@ -76,10 +76,10 @@ onInstall:
                 note: ${settings.noteCDN:}
                 masterEnv: ${env.name}
       - else:
-          - install
+          - installAddon
           - return:
               type: success
-  - else: install
+  - else: installAddon
     
 onAfterScaleOut:
   scale: ${event.params.nodeGroup}
@@ -101,7 +101,7 @@ onBeforeDelete: cdnUninstall
 onUninstall: cdnUninstall
 
 actions:
-  install:
+  installAddon:
     - eval:
         act: install
     - if ("${settings.masterEnv:}"): 
