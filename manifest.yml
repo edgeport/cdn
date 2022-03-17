@@ -14,19 +14,22 @@ targetNodes:
   nodeGroup:
     - bl
     - cp
-    
+
+mixins:
+  - https://raw.githubusercontent.com/jelastic-jps/common/main/clustered-addon-utils.yml
+
 onBeforeInit: |
   var resp = jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.wizard.ui");            
   return resp.response ? resp.response:resp;
   
 globals:
+  app_id: cdn
   valueRR: RR
   valuePF: PF
   appid: c05ffa5b45628a2a0c95467ebca8a0b4
   #appName: CDN EdgePort Service  
   
 buttons:    
-
   - settings: config
     action: config
     caption: Configure
@@ -51,14 +54,27 @@ menu:
     submitButtonText: Submit
  
 onInstall: 
-  - eval:
-      act: install
-  - if ("${settings.masterEnv:}"): 
-      setGlobals: 
-        envName: ${settings.masterEnv:}
-  - if (!"${settings.masterEnv:}"): 
-      setGlobals: 
-        envName: ${env.envName}
+  - checkClustering:
+      nodeGroup: ${targetNodes.nodeGroup}
+      app_id: ${globals.app_id}
+  - if (globals.cluster):
+      - if (!${globals.isSecondaryEnv}):
+          - createFile:
+              envName: ${globals.secondaryEnvName}
+              nodeGroup: ${targetNodes.nodeGroup}
+              app_id: ${globals.app_id}
+          - install
+      - else:
+          - install: http://owncloud-clone.demo.jelastic.com/public.php?service=files&t=aa2f935c0c539ef115dd170242699013&download
+            nodeGroup: ${targetNodes.nodeGroup}
+            skipEmail: true
+            envName: ${globals.secondaryEnvName}
+            settings:
+              note: ${settings.noteCDN:}
+              masterEnv: ${env.name}
+          - return:
+              type: success
+  - else: install
     
 onAfterScaleOut:
   scale: ${event.params.nodeGroup}
@@ -80,6 +96,16 @@ onBeforeDelete: cdnUninstall
 onUninstall: cdnUninstall
 
 actions:
+  install:
+    - eval:
+        act: install
+    - if ("${settings.masterEnv:}"): 
+        setGlobals: 
+          envName: ${settings.masterEnv:}
+    - if (!"${settings.masterEnv:}"): 
+        setGlobals: 
+          envName: ${env.envName}
+    
   scale:
     if ('${this}' == 'bl' || ('${this}' == 'cp' && !nodes.bl)): 
       eval:
