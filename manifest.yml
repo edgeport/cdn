@@ -64,14 +64,19 @@ onInstall:
               nodeGroup: ${targetNodes.nodeGroup}
               app_id: ${globals.app_id}
           - install
+          - script: return jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.info", {partnerCode:1})
+          - cmd[${nodes.cp.master.id}]: |-
+              bash ~/bin/setupWP.sh --edgeportCDN true --CDN_URL ${env.envName}-${response.response.partnerCode}.cdn.jelastic.net
+          - install: 
+              jps: http://owncloud-clone.demo.jelastic.com/public.php?service=files&t=aa2f935c0c539ef115dd170242699013&download
+              nodeGroup: ${targetNodes.nodeGroup}
+              skipEmail: true
+              envName: ${globals.secondaryEnvName}
+              settings:
+                note: ${settings.noteCDN:}
+                masterEnv: ${env.name}
       - else:
-          - install: http://owncloud-clone.demo.jelastic.com/public.php?service=files&t=aa2f935c0c539ef115dd170242699013&download
-            nodeGroup: ${targetNodes.nodeGroup}
-            skipEmail: true
-            envName: ${globals.secondaryEnvName}
-            settings:
-              note: ${settings.noteCDN:}
-              masterEnv: ${env.name}
+          - install
           - return:
               type: success
   - else: install
