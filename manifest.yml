@@ -3,7 +3,7 @@ type: update
 categories:
 - apps/dev-tools
 id: cdn
-baseUrl: https://raw.githubusercontent.com/edgeport/cdn/multi
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/cdn/multi
 name: HTTP/3 Premium CDN
 logo: /images/edgeport-blue-logo-70x70.png
 homepage: https://jelastic.com/blog/enterprise-cdn-verizon-integration/
