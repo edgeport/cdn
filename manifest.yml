@@ -3,7 +3,7 @@ type: update
 categories:
 - apps/dev-tools
 id: cdn
-baseUrl: https://raw.githubusercontent.com/edgeport/cdn/master
+baseUrl: https://raw.githubusercontent.com/edgeport/cdn/multi
 name: HTTP/3 Premium CDN
 logo: /images/edgeport-blue-logo-70x70.png
 homepage: https://jelastic.com/blog/enterprise-cdn-verizon-integration/
@@ -136,7 +136,30 @@ actions:
       path: ${this:}
           
   cdnUninstall:
-    eval: 
-      script: uninstall          
+    - eval: 
+        script: uninstall
+    - checkClustering:
+        nodeGroup: ${targetNodes.nodeGroup}
+        app_id: ${globals.app_id}
+    - if (globals.cluster):
+      - if (!globals.isSecondaryExecuted):
+        - markExecutedEnvFile:
+            nodeGroup: ${targetNodes.nodeGroup}
+            app_id: ${globals.app_id}
+        - executeAction:
+            envName: ${globals.secondaryEnvName}
+            nodeGroup: ${targetNodes.nodeGroup}
+            action: uninstall
+            app_id: ${globals.app_id}
+        - removeExecutedEnvFile:
+            nodeGroup: ${targetNodes.nodeGroup}
+            app_id: ${globals.app_id}
+        - removeExecutedEnvFile:
+            nodeGroup: ${targetNodes.nodeGroup}
+            app_id: ${globals.app_id}
+            extension: lock
+      - else:
+          script: |
+            return {result: 0}
 
 success: /text/success.md
