@@ -16,7 +16,7 @@ targetNodes:
     - cp
 
 mixins:
-  - https://raw.githubusercontent.com/jelastic-jps/common/main/clustered-addon-utils.yml
+  - https://raw.githubusercontent.com/jelastic-jps/common/cdn-configure/clustered-addon-utils.yml
 
 onBeforeInit: |
   var resp = jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.wizard.ui");            
@@ -124,8 +124,22 @@ actions:
 
   #TODO: send message to owner after change SSL option, strore in DB for charging job
   config:
-    eval:
-      act: config             
+    - checkClustering:
+        nodeGroup: ${targetNodes.nodeGroup}
+        app_id: ${globals.app_id}
+    - if (globals.cluster):
+      - if (!${globals.isSecondaryEnv}):
+        - eval:
+            act: config
+      - else:
+        - executeAction:
+            envName: ${globals.primaryEnvName}
+            nodeGroup: ${targetNodes.nodeGroup}
+            action: config
+            app_id: ${globals.app_id}
+    - else:
+      - eval:
+          act: config
 
   purgeSingle:
     purge: ${settings.purgefile}
