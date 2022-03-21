@@ -3,7 +3,7 @@ type: update
 categories:
 - apps/dev-tools
 id: cdn
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/cdn/multi
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/cdn/multi-test
 name: HTTP/3 Premium CDN
 logo: /images/edgeport-blue-logo-70x70.png
 homepage: https://jelastic.com/blog/enterprise-cdn-verizon-integration/
@@ -71,10 +71,7 @@ onInstall:
               jps: ${baseUrl}/manifest.yml
               nodeGroup: ${targetNodes.nodeGroup}
               skipEmail: true
-              envName: ${globals.secondaryEnvName}
-              settings:
-                note: ${settings.noteCDN:}
-                masterEnv: ${env.name}
+              envName: ${globals.secondaryEnvName}                
       - else:
           - installAddon
           - return:
@@ -135,8 +132,11 @@ actions:
         - executeAction:
             envName: ${globals.primaryEnvName}
             nodeGroup: ${targetNodes.nodeGroup}
-            action: config
+            action: ${this.act:config}
             app_id: ${globals.app_id}
+            settings:
+              customCname: ${settings.customCname:}
+              header: ${settings.header:}
     - else:
       - eval:
           act: config
