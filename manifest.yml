@@ -64,7 +64,7 @@ onInstall:
               nodeGroup: ${targetNodes.nodeGroup}
               app_id: ${globals.app_id}
           - installAddon
-          - script: return jelastic.dev.scripting.Eval("${globals.appid}", session, "cdn.info", { partnerCode: true })
+          - script: return api.dev.scripting.Eval("${globals.appid}", session, "cdn.info", { partnerCode:true })
           - cmd[${nodes.cp.master.id}]: |-
               bash ~/bin/setupWP.sh --edgeportCDN true --CDN_URL '${env.envName}-${response.response.partnerCode}.cdn.jelastic.net'
           - install: 
