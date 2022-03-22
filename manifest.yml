@@ -137,6 +137,9 @@ actions:
             nodeGroup: ${targetNodes.nodeGroup}
             action: ${this.act:config}
             app_id: ${globals.app_id}
+            settings:
+              customCname: ${settings.customCname:}
+              header: ${settings.header:}
     - else:
       - eval:
           act: config
