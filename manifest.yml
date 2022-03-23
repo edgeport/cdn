@@ -77,8 +77,6 @@ onInstall:
                 masterEnv: ${env.name}
       - else:
           - installAddon
-          - return:
-              type: success
   - else: installAddon
     
 onAfterScaleOut:
@@ -163,11 +161,19 @@ actions:
         - markExecutedEnvFile:
             nodeGroup: ${targetNodes.nodeGroup}
             app_id: ${globals.app_id}
-        - executeAction:
-            envName: ${globals.secondaryEnvName}
-            nodeGroup: ${targetNodes.nodeGroup}
-            action: uninstall
-            app_id: ${globals.app_id}
+        - if (!globals.isOppositeExecuted):
+          - if (globals.isSecondaryEnv):
+              executeAction:
+                envName: ${globals.primaryEnvName}
+                nodeGroup: ${targetNodes.nodeGroup}
+                action: uninstall
+                app_id: ${globals.app_id}
+          - else:
+              executeAction:
+                envName: ${globals.secondaryEnvName}
+                nodeGroup: ${targetNodes.nodeGroup}
+                action: uninstall
+                app_id: ${globals.app_id}
         - removeExecutedEnvFile:
             nodeGroup: ${targetNodes.nodeGroup}
             app_id: ${globals.app_id}
@@ -175,8 +181,5 @@ actions:
             nodeGroup: ${targetNodes.nodeGroup}
             app_id: ${globals.app_id}
             extension: lock
-      - else:
-          script: |
-            return {result: 0}
 
 success: /text/success.md
