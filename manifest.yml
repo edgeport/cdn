@@ -16,10 +16,10 @@ targetNodes:
     - cp
 
 mixins:
-  - https://raw.githubusercontent.com/jelastic-jps/common/main/clustered-addon-utils.yml
+  - https://raw.githubusercontent.com/jelastic-jps/common/cdn-configure/clustered-addon-utils.yml
 
 onBeforeInit: |
-  var resp = jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.wizard.ui");            
+  var resp = api.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.wizard.ui");            
   return resp.response ? resp.response:resp;
   
 globals:
@@ -64,9 +64,9 @@ onInstall:
               nodeGroup: ${targetNodes.nodeGroup}
               app_id: ${globals.app_id}
           - installAddon
-          - script: return jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.info", {partnerCode:1})
+          - script: return api.dev.scripting.Eval("${globals.appid}", session, "cdn.info", { partnerCode:true })
           - cmd[${nodes.cp.master.id}]: |-
-              bash ~/bin/setupWP.sh --edgeportCDN true --CDN_URL ${env.envName}-${response.response.partnerCode}.cdn.jelastic.net
+              bash ~/bin/setupWP.sh --edgeportCDN true --CDN_URL '${env.envName}-${response.response.partnerCode}.cdn.jelastic.net'
           - install: 
               jps: ${baseUrl}/manifest.yml
               nodeGroup: ${targetNodes.nodeGroup}
@@ -77,8 +77,6 @@ onInstall:
                 masterEnv: ${env.name}
       - else:
           - installAddon
-          - return:
-              type: success
   - else: installAddon
     
 onAfterScaleOut:
@@ -119,13 +117,30 @@ actions:
   eval:
     script: |-
         var params = {masterEnv:"${settings.masterEnv:}", envName:"${env.envName}", action:"${this.act:script}", ha:"${settings.ha:}", header:"${settings.header:}", customCname:"${settings.customCname:}", path:"${this.path:}", note:"${settings.note:}"},
-            resp = jelastic.dev.scripting.Eval("${globals.appid}", session, "cdn.${this.script:install}", params);            
+            resp = api.dev.scripting.Eval("${globals.appid}", session, "cdn.${this.script:install}", params);            
         return resp.response ? resp.response:resp;      
 
   #TODO: send message to owner after change SSL option, strore in DB for charging job
   config:
-    eval:
-      act: config             
+    - checkClustering:
+        nodeGroup: ${targetNodes.nodeGroup}
+        app_id: ${globals.app_id}
+    - if (globals.cluster):
+      - if (!${globals.isSecondaryEnv}):
+        - eval:
+            act: config
+      - else:
+        - executeAction:
+            envName: ${globals.primaryEnvName}
+            nodeGroup: ${targetNodes.nodeGroup}
+            action: ${this.act:config}
+            app_id: ${globals.app_id}
+            settings:
+              customCname: ${settings.customCname:}
+              header: ${settings.header:}
+    - else:
+      - eval:
+          act: config
 
   purgeSingle:
     purge: ${settings.purgefile}
@@ -146,11 +161,19 @@ actions:
         - markExecutedEnvFile:
             nodeGroup: ${targetNodes.nodeGroup}
             app_id: ${globals.app_id}
-        - executeAction:
-            envName: ${globals.secondaryEnvName}
-            nodeGroup: ${targetNodes.nodeGroup}
-            action: uninstall
-            app_id: ${globals.app_id}
+        - if (!globals.isOppositeExecuted):
+          - if (globals.isSecondaryEnv):
+              executeAction:
+                envName: ${globals.primaryEnvName}
+                nodeGroup: ${targetNodes.nodeGroup}
+                action: uninstall
+                app_id: ${globals.app_id}
+          - else:
+              executeAction:
+                envName: ${globals.secondaryEnvName}
+                nodeGroup: ${targetNodes.nodeGroup}
+                action: uninstall
+                app_id: ${globals.app_id}
         - removeExecutedEnvFile:
             nodeGroup: ${targetNodes.nodeGroup}
             app_id: ${globals.app_id}
@@ -158,8 +181,5 @@ actions:
             nodeGroup: ${targetNodes.nodeGroup}
             app_id: ${globals.app_id}
             extension: lock
-      - else:
-          script: |
-            return {result: 0}
 
 success: /text/success.md
