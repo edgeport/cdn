@@ -14,19 +14,22 @@ targetNodes:
   nodeGroup:
     - bl
     - cp
-    
+
+mixins:
+  - https://raw.githubusercontent.com/jelastic-jps/common/main/clustered-addon-utils.yml
+
 onBeforeInit: |
-  var resp = jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.wizard.ui");            
+  var resp = api.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.wizard.ui");            
   return resp.response ? resp.response:resp;
   
 globals:
+  app_id: cdn
   valueRR: RR
   valuePF: PF
   appid: c05ffa5b45628a2a0c95467ebca8a0b4
   #appName: CDN EdgePort Service  
   
 buttons:    
-
   - settings: config
     action: config
     caption: Configure
@@ -51,14 +54,30 @@ menu:
     submitButtonText: Submit
  
 onInstall: 
-  - eval:
-      act: install
-  - if ("${settings.masterEnv:}"): 
-      setGlobals: 
-        envName: ${settings.masterEnv:}
-  - if (!"${settings.masterEnv:}"): 
-      setGlobals: 
-        envName: ${env.envName}
+  - checkClustering:
+      nodeGroup: ${targetNodes.nodeGroup}
+      app_id: ${globals.app_id}
+  - if (globals.cluster):
+      - if (!${globals.isSecondaryEnv}):
+          - createFile:
+              envName: ${globals.secondaryEnvName}
+              nodeGroup: ${targetNodes.nodeGroup}
+              app_id: ${globals.app_id}
+          - installAddon
+          - script: return api.dev.scripting.Eval("${globals.appid}", session, "cdn.info", { partnerCode:true })
+          - cmd[${nodes.cp.master.id}]: |-
+              bash ~/bin/setupWP.sh --edgeportCDN true --CDN_URL '${env.envName}-${response.response.partnerCode}.cdn.jelastic.net'
+          - install: 
+              jps: ${baseUrl}/manifest.yml
+              nodeGroup: ${targetNodes.nodeGroup}
+              skipEmail: true
+              envName: ${globals.secondaryEnvName}
+              settings:
+                note: ${settings.noteCDN:}
+                masterEnv: ${env.name}
+      - else:
+          - installAddon
+  - else: installAddon
     
 onAfterScaleOut:
   scale: ${event.params.nodeGroup}
@@ -80,6 +99,16 @@ onBeforeDelete: cdnUninstall
 onUninstall: cdnUninstall
 
 actions:
+  installAddon:
+    - eval:
+        act: install
+    - if ("${settings.masterEnv:}"): 
+        setGlobals: 
+          envName: ${settings.masterEnv:}
+    - if (!"${settings.masterEnv:}"): 
+        setGlobals: 
+          envName: ${env.envName}
+    
   scale:
     if ('${this}' == 'bl' || ('${this}' == 'cp' && !nodes.bl)): 
       eval:
@@ -88,13 +117,30 @@ actions:
   eval:
     script: |-
         var params = {masterEnv:"${settings.masterEnv:}", envName:"${env.envName}", action:"${this.act:script}", ha:"${settings.ha:}", header:"${settings.header:}", customCname:"${settings.customCname:}", path:"${this.path:}", note:"${settings.note:}"},
-            resp = jelastic.dev.scripting.Eval("${globals.appid}", session, "cdn.${this.script:install}", params);            
+            resp = api.dev.scripting.Eval("${globals.appid}", session, "cdn.${this.script:install}", params);            
         return resp.response ? resp.response:resp;      
 
   #TODO: send message to owner after change SSL option, strore in DB for charging job
   config:
-    eval:
-      act: config             
+    - checkClustering:
+        nodeGroup: ${targetNodes.nodeGroup}
+        app_id: ${globals.app_id}
+    - if (globals.cluster):
+      - if (!${globals.isSecondaryEnv}):
+        - eval:
+            act: config
+      - else:
+        - executeAction:
+            envName: ${globals.primaryEnvName}
+            nodeGroup: ${targetNodes.nodeGroup}
+            action: ${this.act:config}
+            app_id: ${globals.app_id}
+            settings:
+              customCname: ${settings.customCname:}
+              header: ${settings.header:}
+    - else:
+      - eval:
+          act: config
 
   purgeSingle:
     purge: ${settings.purgefile}
@@ -105,7 +151,35 @@ actions:
       path: ${this:}
           
   cdnUninstall:
-    eval: 
-      script: uninstall          
+    - eval: 
+        script: uninstall
+    - checkClustering:
+        nodeGroup: ${targetNodes.nodeGroup}
+        app_id: ${globals.app_id}
+    - if (globals.cluster):
+      - if (!globals.isSecondaryExecuted):
+        - markExecutedEnvFile:
+            nodeGroup: ${targetNodes.nodeGroup}
+            app_id: ${globals.app_id}
+        - if (!globals.isOppositeExecuted):
+          - if (globals.isSecondaryEnv):
+              executeAction:
+                envName: ${globals.primaryEnvName}
+                nodeGroup: ${targetNodes.nodeGroup}
+                action: uninstall
+                app_id: ${globals.app_id}
+          - else:
+              executeAction:
+                envName: ${globals.secondaryEnvName}
+                nodeGroup: ${targetNodes.nodeGroup}
+                action: uninstall
+                app_id: ${globals.app_id}
+        - removeExecutedEnvFile:
+            nodeGroup: ${targetNodes.nodeGroup}
+            app_id: ${globals.app_id}
+        - removeExecutedEnvFile:
+            nodeGroup: ${targetNodes.nodeGroup}
+            app_id: ${globals.app_id}
+            extension: lock
 
 success: /text/success.md
