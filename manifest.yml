@@ -3,7 +3,7 @@ type: update
 categories:
 - apps/dev-tools
 id: cdn
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/cdn/multi
+baseUrl: https://raw.githubusercontent.com/edgeport/cdn/master
 name: HTTP/3 Premium CDN
 logo: /images/edgeport-blue-logo-70x70.png
 homepage: https://jelastic.com/blog/enterprise-cdn-verizon-integration/
@@ -16,7 +16,7 @@ targetNodes:
     - cp
 
 mixins:
-  - https://raw.githubusercontent.com/jelastic-jps/common/cdn-configure/clustered-addon-utils.yml
+  - https://raw.githubusercontent.com/jelastic-jps/common/main/clustered-addon-utils.yml
 
 onBeforeInit: |
   var resp = api.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.wizard.ui");            
