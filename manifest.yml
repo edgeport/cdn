@@ -6,7 +6,7 @@ id: cdn
 baseUrl: https://raw.githubusercontent.com/edgeport/cdn/master
 name: HTTP/3 Premium CDN
 logo: /images/edgeport-blue-logo-70x70.png
-homepage: https://jelastic.com/blog/enterprise-cdn-verizon-integration/
+homepage: https://www.virtuozzo.com/company/blog/enterprise-cdn-verizon-integration/
 description:
   short: Enterprise-level HTTP-over-QUIC CDN
 
